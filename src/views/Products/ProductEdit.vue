@@ -55,57 +55,69 @@
           <h1 class="mx-auto text-white text-2xl mb-4"> Variants </h1>
 
           <div class="grid grid-cols-2 gap-4">
-            <div class="form-group mb-6">
+            <div class="form-group">
               <input
-                v-model="variant.color"
+                v-model="attribute.name"
                 type="text"
                 class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
-                placeholder="Color">
+                placeholder="Name">
             </div>
 
-            <div class="form-group mb-6">
+            <div class="form-group">
               <input
-                v-model="variant.price"
-                min="1"
-                type="number"
-                class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
-                placeholder="Price">
-            </div>
-
-            <div class="form-group mb-6">
-              <input
-                v-model="variant.size"
+                v-model="attribute.value"
                 type="text"
                 class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
-                placeholder="Sizes: like small, medium, large"
+                placeholder="Value"
               >
             </div>
           </div>
 
-          <div class="mx-auto block mt-4">
-            <button
-              type="button"
-              class="w-1/4 bg-emerald-500 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded"
-              @click="addVariant()">
-              Add
-            </button>
-          </div>
+          <div v-if="attributes.length > 0" class="my-2">
+            <span v-for="(attri, index) in attributes" :id="index" :key="index"
+                  class="my-4 mr-2"
+            >
+              <span class="text-white text-left">
+                  {{ attri.name }}: {{ attri.value }},
+              </span>name
 
-          <div v-if="form.variants.length > 0 ">
-            <div v-for="(v, index) in form.variants" :id="index" :key="index" class="flex flex-row justify-between my-4">
-              <p  class="text-white text-left">
-                Color: {{ v.color }}, Size: {{ v.size }}, Price: $ {{ v.price }}
-              </p>
-
-              <button v-if="v" type="button" @click="remove(index)" class="p-2 px-4 bg-red-500 hover:bg-red-800 text-white font-bold rounded text-right">
+              <button
+                @click="removeAttribute(index)"
+                type="button"
+                class="p-2 px-3 bg-red-500 hover:bg-red-800 text-white font-bold rounded text-right">
                 <i class="cursor-pointer fas fa-trash text-sm text-white">
                 </i>
               </button>
-            </div>
-
+            </span>
           </div>
 
-          <div class="mx-auto block mt-4">
+          <div class="mx-auto block my-4 w-full">
+            <button
+              type="button"
+              class="w-1/4 bg-blue-500 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
+              @click="addAttribute()">
+              Add Attribute
+            </button>
+          </div>
+
+          <div class="form-group mb-6">
+            <input
+              v-model="variant_price"
+              min="1"
+              type="number"
+              class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
+              placeholder="Price">
+          </div>
+
+
+          <div class="mx-auto block my-4 flex flex-row justify-between">
+            <button
+              type="button"
+              class="w-1/4 bg-blue-500 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
+              @click="addVariant()">
+              Add Variant
+            </button>
+
             <button
               type="button"
               @click="updateForm"
@@ -113,6 +125,27 @@
               Update Product
             </button>
           </div>
+
+          <div v-if="form.variants.length > 0 ">
+            <div v-for="(v, index) in form.variants" :id="index" :key="index"
+                 class="flex flex-row justify-between my-4">
+                <span class="text-white text-left" v-for="a in v.attributes">
+                  {{ a.name }}: {{ a.value }}
+                </span>
+              <span class="text-white text-left">
+                  Price: $ {{ v.price }}
+                </span>
+
+
+              <button v-if="v" type="button" @click="removeVariant(index)"
+                      class="p-2 px-4 bg-red-500 hover:bg-red-800 text-white font-bold rounded text-right">
+                <i class="cursor-pointer fas fa-trash text-sm text-white">
+                </i>
+              </button>
+            </div>
+
+          </div>
+
         </form>
       </div>
     </div>
@@ -153,11 +186,12 @@ export default {
         price: "",
         variants: []
       },
-      variant: {
-        size: "",
-        color: "",
-        price: "",
-      }
+      attributes: [],
+      attribute: {
+        name: "",
+        value: ""
+      },
+      variant_price: ""
     }
   },
   mounted() {
@@ -178,37 +212,31 @@ export default {
       this.form.name = product.name;
       this.form.brand = product.brand;
       this.form.price = product.price;
-      this.form.variants = [
-        {
-          size: "xl",
-          color: "red",
-          price: "100",
-        },
-        {
-          size: "lg",
-          color: "blue",
-          price: "80",
-        },
-        {
-          size: "md",
-          color: "green",
-          price: "60",
-        }
-      ];
+      this.attributes = [{ name: "color", value: "red"},{ name: "size", value: "xl"}];
+      this.form.variants = [{attributes: this.attributes, price: '100'}];
+    },
+    addAttribute() {
+      this.attributes.push({ ...this.attribute });
+      this.attribute.name = "";
+      this.attribute.value = "";
+      console.log(this.attributes);
+    },
+    removeAttribute(index) {
+      this.attributes.splice(index, 1);
     },
     addVariant() {
-      if(this.variant.size  && this.variant.color && this.variant ) {
-        this.form.variants.push({...this.variant});
-        console.log(this.variant);
-        console.log(this.form);
-        console.log(this.form.variants);
-        this.resetData();
-      } else {
-        this.$toast.error('Please add proper information about variant');
-      }
+      let _variant = {
+        attributes: this.attributes,
+        price: this.variant_price
+      };
 
+      this.form.variants.push({ ..._variant });
+      console.log(this.form);
+      console.log(this.form.variants);
+      this.variant_price = '';
+      this.attribute = [];
     },
-    remove(index) {
+    removeVariant(index) {
       this.form.variants.splice(index, 1);
     },
     updateForm() {

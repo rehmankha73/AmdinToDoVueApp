@@ -59,64 +59,97 @@
           <h1 class="mx-auto text-white text-2xl mb-4"> Variants </h1>
 
           <div class="grid grid-cols-2 gap-4">
-            <div class="form-group mb-6">
+            <div class="form-group">
               <input
-                v-model="variant.color"
+                v-model="attribute.name"
                 type="text"
                 class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
-                placeholder="Color">
+                placeholder="Name">
+            </div>
+
+            <div class="form-group">
+              <input
+                v-model="attribute.value"
+                type="text"
+                class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
+                placeholder="Value"
+              >
+            </div>
+          </div>
+
+          <div v-if="attributes.length > 0" class="my-2">
+            <span v-for="(attri, index) in attributes" :id="index" :key="index"
+                 class="my-4 mr-2"
+            >
+              <span class="text-white text-left">
+                  {{ attri.name }}: {{ attri.value }},
+              </span>name
+
+              <button
+                @click="removeAttribute(index)"
+                type="button"
+                class="p-2 px-3 bg-red-500 hover:bg-red-800 text-white font-bold rounded text-right">
+                <i class="cursor-pointer fas fa-trash text-sm text-white">
+                </i>
+              </button>
+            </span>
+          </div>
+
+            <div class="mx-auto block my-4 w-full">
+              <button
+                type="button"
+                class="w-1/4 bg-blue-500 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
+                @click="addAttribute()">
+                Add Attribute
+              </button>
             </div>
 
             <div class="form-group mb-6">
               <input
-                v-model="variant.price"
+                v-model="variant_price"
                 min="1"
                 type="number"
                 class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
                 placeholder="Price">
             </div>
 
-            <div class="form-group mb-6">
-              <input
-                v-model="variant.size"
-                type="text"
-                class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
-                placeholder="Sizes: like small, medium, large"
-              >
-            </div>
-          </div>
 
-          <div class="mx-auto block mt-4">
-            <button
-              type="button"
-              class="w-1/4 bg-emerald-500 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded"
-              @click="addVariant()">
-              Add
-            </button>
-          </div>
+            <div class="mx-auto block my-4 flex flex-row justify-between">
+              <button
+                type="button"
+                class="w-1/4 bg-blue-500 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
+                @click="addVariant()">
+                Add Variant
+              </button>
 
-          <div v-if="form.variants.length > 0 ">
-            <div v-for="(v, index) in form.variants" :id="index" :key="index" class="flex flex-row justify-between my-4">
-              <p  class="text-white text-left">
-                Color: {{ v.color }}, Size: {{ v.size }}, Price: $ {{ v.price }}
-              </p>
-
-              <button v-if="v" type="button" @click="remove(index)" class="p-2 px-4 bg-red-500 hover:bg-red-800 text-white font-bold rounded text-right">
-                <i class="cursor-pointer fas fa-trash text-sm text-white">
-                </i>
+              <button
+                type="button"
+                @click="submitForm"
+                class="bg-emerald-500 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
+                Add New Product
               </button>
             </div>
 
-          </div>
+            <div v-if="form.variants.length > 0 ">
+              <div v-for="(v, index) in form.variants" :id="index" :key="index"
+                   class="flex flex-row justify-between my-4">
+                <span class="text-white text-left" v-for="a in v.attributes">
+                  {{ a.name }}: {{ a.value }}
+                </span>
+                <span class="text-white text-left">
+                  Price: $ {{ v.price }}
+                </span>
 
-          <div class="mx-auto block mt-4">
-            <button
-              type="button"
-              @click="submitForm"
-              class="bg-emerald-500 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
-              Add New Product
-            </button>
-          </div>
+
+                <button v-if="v" type="button" @click="removeVariant(index)"
+                        class="p-2 px-4 bg-red-500 hover:bg-red-800 text-white font-bold rounded text-right">
+                  <i class="cursor-pointer fas fa-trash text-sm text-white">
+                  </i>
+                </button>
+              </div>
+
+            </div>
+
         </form>
       </div>
     </div>
@@ -137,42 +170,53 @@ export default {
         price: "",
         variants: []
       },
-      variant: {
-        size: "",
-        color: "",
-        price: "",
-      }
+      attributes: [],
+      attribute: {
+        name: "",
+        value: ""
+      },
+      variant_price: ""
     };
   },
   methods: {
     selectImage() {
       this.form.image = this.$refs.file.files.item(0);
     },
-    addVariant() {
-      if(this.variant.size  && this.variant.color && this.variant ) {
-        this.form.variants.push({...this.variant});
-        console.log(this.variant);
-        console.log(this.form);
-        console.log(this.form.variants);
-        this.resetData();
-      } else {
-        this.$toast.error('Please add proper information about variant');
-      }
 
+    addAttribute() {
+      this.attributes.push({ ...this.attribute });
+      this.attribute.name = "";
+      this.attribute.value = "";
+      console.log(this.attributes);
     },
-    remove(index) {
+    removeAttribute(index) {
+      this.attributes.splice(index, 1);
+    },
+    addVariant() {
+      let _variant = {
+        attributes: this.attributes,
+        price: this.variant_price
+      };
+
+      this.form.variants.push({ ..._variant });
+      console.log(this.form);
+      console.log(this.form.variants);
+      this.variant_price = '';
+      this.attribute = [];
+    },
+    removeVariant(index) {
       this.form.variants.splice(index, 1);
     },
     submitForm() {
-      if(this.form.category === '' ) {
+      if (this.form.category === "") {
         return this.$toast.error("Category is required!");
-      }else if(this.form.name === '') {
+      } else if (this.form.name === "") {
         return this.$toast.error("Name is required!");
-      }else if(!this.form.image){
+      } else if (!this.form.image) {
         return this.$toast.error("Image is required!");
-      }else if(this.form.brand === ''){
+      } else if (this.form.brand === "") {
         return this.$toast.error("Brand is required!");
-      }else if(this.form.price === '') {
+      } else if (this.form.price === "") {
         return this.$toast.error("Price is required!");
       }
 
@@ -180,14 +224,10 @@ export default {
       console.log("submit");
       this.$toast.success("Product Created successfully!");
       this.$router.push({ name: "product-index" });
-    },
-    resetData() {
-      this.variant.size = '';
-      this.variant.color = '';
-      this.variant.price = '';
     }
   }
-};
+}
+;
 </script>
 
 <style scoped>
