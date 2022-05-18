@@ -23,6 +23,7 @@
                 placeholder="Product Name">
             </div>
           </div>
+
           <div class="grid grid-cols-1 gap-4">
             <div class="form-group mb-6">
               <input
@@ -81,9 +82,9 @@
             <span v-for="(attri, index) in attributes" :id="index" :key="index"
                  class="my-4 mr-2"
             >
-              <span class="text-white text-left">
-                  {{ attri.name }}: {{ attri.value }},
-              </span>name
+              <span class="text-white text-left mr-2">
+                  {{ attri.name }}: {{ attri.value }}
+              </span>
 
               <button
                 @click="removeAttribute(index)"
@@ -110,7 +111,7 @@
                 min="1"
                 type="number"
                 class="form-control block w-full px-3 py-1.5 text-base font-normal text-emerald-700 bg-white bg-clip-padding border border-solid border-emerald-300 rounded transition ease-in-out m-0 focus:text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"
-                placeholder="Price">
+                placeholder="Variant Price">
             </div>
 
 
@@ -184,15 +185,26 @@ export default {
     },
 
     addAttribute() {
+      if(!this.attribute.name && !this.attribute.value) {
+        return this.$toast.error('Please fill attribute name & value correctly!');
+      }
+
       this.attributes.push({ ...this.attribute });
       this.attribute.name = "";
       this.attribute.value = "";
-      console.log(this.attributes);
     },
+
     removeAttribute(index) {
       this.attributes.splice(index, 1);
     },
+
     addVariant() {
+      if(this.attributes.length === 0) {
+        return this.$toast.error('Please add at-least one attribute');
+      } else if(!this.variant_price) {
+        return this.$toast.error('Please add variant price!');
+      }
+
       let _variant = {
         attributes: this.attributes,
         price: this.variant_price
@@ -202,7 +214,7 @@ export default {
       console.log(this.form);
       console.log(this.form.variants);
       this.variant_price = '';
-      this.attribute = [];
+      this.attributes = [];
     },
     removeVariant(index) {
       this.form.variants.splice(index, 1);

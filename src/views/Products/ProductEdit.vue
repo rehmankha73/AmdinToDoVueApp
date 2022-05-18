@@ -77,9 +77,9 @@
             <span v-for="(attri, index) in attributes" :id="index" :key="index"
                   class="my-4 mr-2"
             >
-              <span class="text-white text-left">
+              <span class="text-white text-left mr-2">
                   {{ attri.name }}: {{ attri.value }},
-              </span>name
+              </span>
 
               <button
                 @click="removeAttribute(index)"
@@ -212,19 +212,30 @@ export default {
       this.form.name = product.name;
       this.form.brand = product.brand;
       this.form.price = product.price;
-      this.attributes = [{ name: "color", value: "red"},{ name: "size", value: "xl"}];
-      this.form.variants = [{attributes: this.attributes, price: '100'}];
+      this.form.variants = [{attributes: [{ name: "color", value: "red"},{ name: "size", value: "xl"}], price: '100'}];
     },
+
     addAttribute() {
+      if(!this.attribute.name && !this.attribute.value) {
+        return this.$toast.error('Please fill attribute name & value correctly!');
+      }
+
       this.attributes.push({ ...this.attribute });
       this.attribute.name = "";
       this.attribute.value = "";
-      console.log(this.attributes);
     },
+
     removeAttribute(index) {
       this.attributes.splice(index, 1);
     },
+
     addVariant() {
+      if(this.attributes.length === 0) {
+        return this.$toast.error('Please add at-least one attribute');
+      } else if(!this.variant_price) {
+        return this.$toast.error('Please add variant price!');
+      }
+
       let _variant = {
         attributes: this.attributes,
         price: this.variant_price
@@ -234,7 +245,7 @@ export default {
       console.log(this.form);
       console.log(this.form.variants);
       this.variant_price = '';
-      this.attribute = [];
+      this.attributes = [];
     },
     removeVariant(index) {
       this.form.variants.splice(index, 1);
