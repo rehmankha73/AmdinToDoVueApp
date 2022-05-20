@@ -139,7 +139,7 @@ import react from "@/assets/img/react.jpg";
 import angular from "@/assets/img/angular.jpg";
 import sketch from "@/assets/img/sketch.jpg";
 import vue from "@/assets/img/vue.jpg";
-
+// import { EventBus } from "@/main";
 export default {
   name: "Product Categories",
   components: {
@@ -160,6 +160,11 @@ export default {
         { id: '10', image: vue, category: 'Accessories', name: 'D230 -45' , brand: 'Dell', price: '360' },
       ],
     }
+  },
+  mounted() {
+    // EventBus.$on('ProductCreate', (_data)  => {
+    //   alert(_data);
+    // });
   }
 
 };
